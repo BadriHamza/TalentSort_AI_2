@@ -9,13 +9,21 @@ import pdfplumber
 from docx import Document
 from pptx import Presentation
 import base64
+import json
 # Charger le modèle
 #tfidf_model = joblib.load('models/tf_idf_model.joblib')
 # Charger le modèle et le vecteur TF-IDF
 logistic_regression_model = joblib.load('models/tf_idf_model.joblib')
 tfidf_vectorizer = joblib.load('models/tfidf_vectorizer.joblib')  # Assurez-vous d'avoir sauvegardé le vecteur TF-IDF pendant l'entraînement
 label_encoder = joblib.load('models/label_encoder.joblib')
-
+# hide_st_style = """
+#             <style>
+#             #MainMenu {visibility: hidden;}
+#             footer {visibility: hidden;}
+#             header {visibility: hidden;}
+#             </style>
+#             """
+# st.markdown(hide_st_style, unsafe_allow_html=False)
 # Fonction pour effectuer la prédiction
 def predict_category(text):
     # Prétraitement du texte (assurez-vous que c'est le même que celui utilisé pour l'entraînement)
@@ -28,7 +36,14 @@ def predict_category(text):
     predicted_category = label_encoder.inverse_transform([prediction])[0]
 
     return predicted_category
-
+def convert_to_json(text):
+    try:
+        # Convertir le texte en structure JSON
+        json_data = {"text_content": text}
+        json_result = json.dumps(json_data, indent=2)
+        return json_result
+    except Exception as e:
+        return f"Erreur lors de la conversion en JSON : {str(e)}"
 
 # Logo (optionnel)
 #st.image("le-wagon-logo.png", width=200)  # Remplacez "path/to/your/logo.png" par le chemin de votre logo
@@ -124,12 +139,15 @@ elif selected == "Projects":
     st.write("Bienvenue dans notre application de catégorisation des CVs. Entrez le texte d'un CV pour prédire sa catégorie.")
     selected = option_menu(
         menu_title=None,
-        options=["Csv","Pdf","Word","Img","pptx","text"],
+        options=["Csv","Pdf","Word","Img","pptx","text","JSON"],
         icons=["filetype-csv","file-pdf","file-word","file-image","file-ppt","file-earmark-text"],
         menu_icon="cast",
         default_index=0,
         orientation="horizontal",
     )
+
+
+
     if selected == "text":
         # Zone de saisie utilisateur
         user_input = st.text_area("Entrez le texte du CV ici:")
@@ -205,6 +223,16 @@ elif selected == "Projects":
             # Afficher le texte extrait
             st.write(text)
 
+    if selected == "JSON":
+        # Zone de saisie utilisateur
+        user_input = st.text_area("Entrez le texte du CV ici:")
+        # Bouton de prédiction
+        if st.button(" Convertir en JSON "):
+        # Vérifier si l'utilisateur a saisi quelque chose
+            if user_input:
+                # Obtenir la prédiction
+                text_json = convert_to_json(user_input)
+                st.text(text_json)
 
 elif selected == "Recherche":
     st.title("Recherche dans les CVs")
