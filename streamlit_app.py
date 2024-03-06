@@ -73,7 +73,7 @@ with st.sidebar:
 
     selected = option_menu(
         menu_title="Main menu",
-        options=["Home","Projects","Contacts","Recherche","À propos"],
+        options=["Home","Prédiction Catégorie","Contacts","Recherche","À propos"],
         icons=["house","book","envelope","search"],
         menu_icon="cast",
         default_index=0,
@@ -130,13 +130,14 @@ if selected == "Home":
     # Ajoutez le contenu de la page d'accueil ici
 
 
-elif selected == "Projects":
+elif selected == "Prédiction Catégorie":
     # Interface utilisateur Streamlit
     st.title('Categorisation des CVs')
 
 
     # Texte d'introduction
-    st.write("Bienvenue dans notre application de catégorisation des CVs. Entrez le texte d'un CV pour prédire sa catégorie.")
+    st.write("Bienvenue dans notre application de catégorisation des CVs.")
+    st.write(" Sélectionnez le format du votre  CV pour prédire sa catégorie.")
     selected = option_menu(
         menu_title=None,
         options=["Csv","Pdf","Word","Img","pptx","text","JSON"],
@@ -180,6 +181,13 @@ elif selected == "Projects":
 
             # Afficher le texte extrait
             st.write(text)
+        if st.button("Prédire la catégorie"):
+        # Vérifier si l'utilisateur a saisi quelque chose
+            if text:
+                    # Obtenir la prédiction
+                prediction = predict_category(text)
+
+                st.success(f"La catégorie prédite est: {prediction}")
 
     if selected == "Csv":
         st.set_option('deprecation.showfileUploaderEncoding', False)
@@ -188,7 +196,13 @@ elif selected == "Projects":
         if uploaded_file is not None:
             data = pd.read_csv(uploaded_file)
             st.write(data)
+        if st.button("Prédire la catégorie"):
+        # Vérifier si l'utilisateur a saisi quelque chose
+            if data:
+                    # Obtenir la prédiction
+                prediction = predict_category(data)
 
+                st.success(f"La catégorie prédite est: {prediction}")
     if selected == "Word":
         st.set_option('deprecation.showfileUploaderEncoding', False)
         uploaded_file = st.file_uploader("Choose a Word file", type="docx")
@@ -204,6 +218,13 @@ elif selected == "Projects":
 
             # Afficher le texte extrait
             st.write(text)
+        if st.button("Prédire la catégorie"):
+        # Vérifier si l'utilisateur a saisi quelque chose
+            if text:
+                    # Obtenir la prédiction
+                prediction = predict_category(text)
+
+                st.success(f"La catégorie prédite est: {prediction}")
 
     if selected == "pptx":
         st.set_option('deprecation.showfileUploaderEncoding', False)
@@ -222,6 +243,13 @@ elif selected == "Projects":
 
             # Afficher le texte extrait
             st.write(text)
+        if st.button("Prédire la catégorie"):
+        # Vérifier si l'utilisateur a saisi quelque chose
+            if text:
+                    # Obtenir la prédiction
+                prediction = predict_category(text)
+
+                st.success(f"La catégorie prédite est: {prediction}")
 
     if selected == "JSON":
         # Zone de saisie utilisateur
@@ -236,8 +264,40 @@ elif selected == "Projects":
 
 elif selected == "Recherche":
     st.title("Recherche dans les CVs")
-    search_input = st.text_input("Rechercher dans les CVs", "")
-    # Ajoutez le contenu de la page de recherche ici
+
+    st.set_option('deprecation.showfileUploaderEncoding', False)
+    uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
+
+    if uploaded_file is not None:
+        # Lire le fichier PDF
+        with pdfplumber.open(uploaded_file) as pdf:
+            # Extraire le texte de chaque page
+            text = ""
+            for page_num in range(len(pdf.pages)):
+                page = pdf.pages[page_num]
+                text += page.extract_text()
+
+        # Afficher le texte extrait
+        st.write(text)
+
+        # Zone de saisie pour la recherche
+        search_input = st.text_input("Rechercher dans les CVs", "")
+
+        # Bouton de recherche
+        if st.button("Rechercher"):
+            # Vérifier si l'utilisateur a saisi quelque chose
+            if search_input:
+                # Effectuer la recherche dans le texte
+                match = re.search(search_input, text)
+
+                # Afficher les résultats de la recherche
+                if match:
+                    st.success(f"Résultat trouvé : '{match.group()}'")
+                else:
+                    st.warning("Aucun résultat trouvé.")
+            else:
+                st.warning("Veuillez saisir quelque chose dans la zone de recherche.")
+
 
 
 elif selected == "À propos":
