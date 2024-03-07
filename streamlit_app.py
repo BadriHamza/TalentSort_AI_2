@@ -1,4 +1,4 @@
-from sklearn.calibration import LabelEncoder
+from sklearn.preprocessing import LabelEncoder
 import streamlit as st
 import joblib
 import re
